@@ -1,0 +1,18 @@
+{
+  "title": "DevOps E2E App Overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP requests/sec",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total[1m])) by (route, status)",
+          "legendFormat": "{{route}} {{status}}"
+        }
+      ]
+    }
+  ]
+}
