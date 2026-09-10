@@ -81,26 +81,39 @@ jobs:
 
   sonarcloud:
     needs: lint-test
-    if: ${{ secrets.SONAR_TOKEN != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Check SONAR_TOKEN is configured
+        id: sonar_check
+        run: |
+          if [ -n "${{ secrets.SONAR_TOKEN }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SONAR_TOKEN secret not set, skipping SonarCloud scan"
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.sonar_check.outputs.enabled == 'true'
         with:
           node-version: "20"
           cache: "npm"
           cache-dependency-path: app/package.json
 
       - working-directory: app
+        if: steps.sonar_check.outputs.enabled == 'true'
         run: npm ci
 
       - working-directory: app
+        if: steps.sonar_check.outputs.enabled == 'true'
         run: npm run test:coverage
 
       - name: SonarCloud scan
+        if: steps.sonar_check.outputs.enabled == 'true'
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
