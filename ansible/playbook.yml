@@ -1,0 +1,11 @@
+---
+- name: Configure app servers and run the devops-e2e-pipeline container
+  hosts: app_servers
+  become: true
+  vars:
+    image_name: "ghcr.io/puja-dube02/devops-e2e-pipeline"
+    image_tag: "latest"
+    container_name: "devops-e2e-app"
+
+  roles:
+    - app

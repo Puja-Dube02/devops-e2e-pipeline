@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "lint": "eslint src test",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "test:coverage": "jest --runInBand --coverage --coverageReporters=lcov --coverageReporters=text"
   },
   "dependencies": {
     "express": "^4.19.2",

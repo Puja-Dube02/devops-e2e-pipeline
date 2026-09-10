@@ -1,0 +1,41 @@
+---
+- name: Install Docker
+  ansible.builtin.package:
+    name: docker.io
+    state: present
+
+- name: Ensure Docker service is running
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Log in to GHCR
+  community.docker.docker_login:
+    registry_url: ghcr.io
+    username: "{{ ghcr_username }}"
+    password: "{{ ghcr_token }}"
+  no_log: true
+  when: ghcr_username is defined and ghcr_token is defined
+
+- name: Render app environment file
+  ansible.builtin.template:
+    src: app.env.j2
+    dest: /etc/devops-e2e-app.env
+    mode: "0600"
+
+- name: Pull application image
+  community.docker.docker_image:
+    name: "{{ image_name }}:{{ image_tag }}"
+    source: pull
+    force_source: true
+
+- name: Run application container
+  community.docker.docker_container:
+    name: "{{ container_name }}"
+    image: "{{ image_name }}:{{ image_tag }}"
+    state: started
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ app_port }}:3000"
+    env_file: /etc/devops-e2e-app.env
